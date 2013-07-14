@@ -55,6 +55,7 @@ A role defines a collection of packages which are installed by default for the V
 |:-------------------------|------------------------------------------------:|
 | node.js & npm				| Provides support for node.js utilities
 | n (node version manager)	| Provides support for switching node.js version
+| http-server					| Quick and simple webserver
 | bower						| Client side package manager
 | grunt						| JavaScript task runner
 | susy						| Responsive sass css framework
