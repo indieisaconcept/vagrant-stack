@@ -1,0 +1,66 @@
+{
+
+    "name": "frontend",
+    "chef_type": "role",
+    "json_class": "Chef::Role",
+    "description": "The base role for provisioning a default Front End Development environment",
+
+    "default_attributes": {
+
+        "nodejs": {
+
+            "install_method": "binary",
+
+            "modules": [
+                "n",
+                "bower",
+                "grunt-cli",
+                "http-server"
+            ]
+
+        },
+
+        "ruby": {
+
+            // install default gem dependencies
+
+            "gems": [
+                { "name": "susy"},
+                { "name": "sass"},
+                { "name": "sassy-buttons"},
+                { "name": "compass"},
+                { "name": "compass-normalize"}
+            ]
+
+        },
+
+        "oh_my_zsh": {
+
+            "users": [{
+                "login": "vagrant",
+                "plugins": [
+                    "bower",
+                    "gem",
+                    "git",
+                    "git-extras",
+                    "npm",
+                    "nyan",
+                    "rvm",
+                    "svn"
+                ]
+            }]
+
+        }
+
+    },
+
+    "run_list": [
+        "recipe[git]",
+        "recipe[subversion]",
+        "recipe[ant]",
+        "recipe[oh_my_zsh]",
+        "recipe[nodejs]",
+        "recipe[stack::post]"
+    ]
+
+}

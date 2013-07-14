@@ -1,0 +1,143 @@
+#!/usr/bin/env ruby
+#^syntax detection
+
+#################################
+# HELPERS                       #
+#################################
+
+require './lib/helpers'
+
+# configuration
+VAGRANT_JSON = File.exist?('../stack.json') ? JSON.parse(File.read('../stack.json')) : JSON.parse(File.read('chef/node/stack.json'))
+
+Vagrant.configure("2") do |config|
+
+    init = ARGV.first == "up"
+    provision = ARGV.first == "provision"
+
+    #################################
+    # PLUGINS                       #
+    #################################
+
+    ## BERKSHELF ##
+
+    ENV["BERKSHELF_PATH"] = File.expand_path(File.dirname(__FILE__)) + "/chef/vendor/remote"
+    config.berkshelf.enabled = true
+
+    #################################
+    # Base box and vm configuration #
+    #################################
+
+    config.vm.hostname = "stack"
+
+    # Name of base box to be used
+    config.vm.box = "precise32"
+
+    # Url of base box in case vagrant needs to download it
+    config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+
+    #################################
+    # Virtual Box                   #
+    #################################
+
+    config.vm.provider :virtualbox do |vb|
+
+        # Set the memory size
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+        # VirtualBox performance improvements
+        vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+        vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
+        #vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "off"]
+        vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/workspaces", "1"]
+
+    end
+
+    #################################
+    # Networking                    #
+    #################################
+
+    # Use port-forwarding. Web site will be at http://localhost:4567
+    config.vm.network :forwarded_port, guest: 80, host: 4567
+
+    # Use host-only networking. Required for nfs shared folder.
+    # Web site will be at http://<config.vm.host_name>.local
+    #
+    # config.vm.network :hostonly, "172.21.21.21"
+
+    #################################
+    # WORKSSPACES                   #
+    #################################
+
+    ## DEFAULT
+    config.vm.synced_folder "../workspaces", "/workspaces", id: "workspaces-root"
+
+    ## WORKSPACE FOLDERS FROM CONFIG
+
+    VAGRANT_JSON["projects"].each do |item|
+        if File.directory?(item["host"])
+            config.vm.synced_folder item["host"], item["guest"]
+        end
+
+    end if VAGRANT_JSON["projects"]
+
+    #################################
+    # Provisioners                  #
+    #################################
+
+    if init || provision
+
+        CHEF_CONFIG = VAGRANT_JSON["chef"]
+        CHEF_JSON = CHEF_CONFIG["json"]
+        PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy']
+
+        if CHEF_CONFIG
+
+            # BASE:
+            # Provides initial configuration for proxies etc, which may
+            # be required by subsequent recipies
+
+            config.vm.provision :chef_solo do |chef|
+
+                Helpers.proxy(chef, PROXY) if !(PROXY).nil?
+
+                chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
+                chef.roles_path = "chef/roles"
+                chef.json = CHEF_JSON
+
+                chef.add_role('base');
+
+            end
+
+            ## PROVISION
+
+            config.vm.provision :chef_solo do |chef|
+
+                Helpers.proxy(chef, PROXY) if !(PROXY).nil?
+
+                chef.roles_path = "chef/roles"
+
+                # To turn on chef debug output, run "CHEF_LOG=1 vagrant up" from command line
+                chef.log_level = :debug if !(ENV["CHEF_LOG"]).nil?
+
+                ["role", "recipe"].each do |item|
+
+                    CHEF_CONFIG[item].each do |pkg|
+                        chef.send("add_#{item}", pkg)
+                    end if CHEF_CONFIG[item]
+
+                end
+
+                chef.json = CHEF_JSON
+
+            end
+
+        end
+
+        # Run any necessary shell commands on the vm
+        config.vm.provision :shell, :path => "bin/post-provision.sh"
+
+    end
+
+end

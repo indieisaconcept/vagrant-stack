@@ -1,0 +1,10 @@
+maintainer       "Jonathan Barnett"
+maintainer_email "jme@indieisaconcept.com"
+license          "Apache 2.0"
+description      "Provisioning activities for stack setup"
+long_description ""
+version          "0.1.0"
+
+recipe "stack",          "Unused"
+recipe "stack::proxy",   "Setup proxy"
+recipe "stack::post",    "Post setup activities"

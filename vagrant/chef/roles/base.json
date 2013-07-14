@@ -1,0 +1,14 @@
+{
+
+    "name": "base",
+    "chef_type": "role",
+    "json_class": "Chef::Role",
+    "description": "The base role for provisioning a vm",
+
+    "run_list": [
+        "recipe[stack::proxy]",
+        "recipe[apt]",
+        "recipe[build-essential]"
+    ]
+
+}
