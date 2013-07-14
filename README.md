@@ -51,7 +51,7 @@ A role defines a collection of packages which are installed by default for the V
 
 ##### Frontend (Default)
 
-| Package   				| Overview   
+| Package   				| Overview
 |:-------------------------|------------------------------------------------:|
 | node.js & npm				| Provides support for node.js utilities
 | n (node version manager)	| Provides support for switching node.js version
@@ -86,6 +86,7 @@ workspaces: [
 Execute the command below to provision the VM with the default setup.
 
 ```
+> cd vagrant
 > vagrant up
 ```
 
@@ -105,6 +106,6 @@ Accessing the VM is done via SSH, the command below facilitates this.
 > cd /workspaces
 ```
 
-If you reboot your machine you will need to run `vagrant up` again but since it has already been provisioned it should take < 60 seconds to resume. 
+If you reboot your machine you will need to run `vagrant up` again but since it has already been provisioned it should take < 60 seconds to resume.
 
 For more information on available commands post installation review the vagrant commandline documentation located [here](http://docs.vagrantup.com/v2/cli/index.html)
