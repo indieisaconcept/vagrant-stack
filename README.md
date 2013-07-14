@@ -1,7 +1,7 @@
 # vagrant-stack
 
 
-Provides a standardized development environment for Front End development.
+Provides a standardised rinse and repeat Front End development environment.
 
 ## Prerequisites
 
