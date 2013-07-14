@@ -15,7 +15,7 @@ cookbook 'ant',         path: "chef/vendor/local/cookbooks/ant"
 # REMOTE                            #
 #####################################
 
-cookbook 'apt'
+cookbook 'apt', "1.7.0"
 cookbook 'git'
 cookbook 'subversion'
 cookbook 'build-essential'

@@ -59,7 +59,7 @@ Vagrant.configure("2") do |config|
     #################################
 
     # Use port-forwarding. Web site will be at http://localhost:4567
-    config.vm.network :forwarded_port, guest: 80, host: 4567
+    config.vm.network :forwarded_port, guest: 8080, host: 4567
 
     # Use host-only networking. Required for nfs shared folder.
     # Web site will be at http://<config.vm.host_name>.local
@@ -116,6 +116,7 @@ Vagrant.configure("2") do |config|
 
                 Helpers.proxy(chef, PROXY) if !(PROXY).nil?
 
+                chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
                 chef.roles_path = "chef/roles"
 
                 # To turn on chef debug output, run "CHEF_LOG=1 vagrant up" from command line

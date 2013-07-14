@@ -1,5 +1,5 @@
 maintainer       "Jonathan Barnett"
-maintainer_email "jme@indieisaconcept.com"
+maintainer_email "me@indieisaconcept.com"
 license          "Apache 2.0"
 description      "Provisioning activities for stack setup"
 long_description ""
