@@ -14,6 +14,7 @@ Vagrant.configure("2") do |config|
 
     init = ARGV.first == "up"
     provision = ARGV.first == "provision"
+    reload = ARGV.first == "reload"
 
     #################################
     # PLUGINS                       #
@@ -58,8 +59,8 @@ Vagrant.configure("2") do |config|
     # Networking                    #
     #################################
 
-    # Use port-forwarding. Web site will be at http://localhost:4567
-    config.vm.network :forwarded_port, guest: 8080, host: 4567
+    # Use port-forwarding. Web site will be at http://localhost:2912
+    config.vm.network :forwarded_port, guest: 2912, host: 2912
 
     # Use host-only networking. Required for nfs shared folder.
     # Web site will be at http://<config.vm.host_name>.local
@@ -86,58 +87,66 @@ Vagrant.configure("2") do |config|
     # Provisioners                  #
     #################################
 
-    if init || provision
+    if init || provision || reload
 
-        CHEF_CONFIG = VAGRANT_JSON["chef"]
-        CHEF_JSON = CHEF_CONFIG["json"]
-        PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy']
+        if init || provision
 
-        if CHEF_CONFIG
+            CHEF_CONFIG = VAGRANT_JSON["chef"]
+            CHEF_JSON = CHEF_CONFIG["json"]
+            PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy']
 
-            # BASE:
-            # Provides initial configuration for proxies etc, which may
-            # be required by subsequent recipies
+            if CHEF_CONFIG
 
-            config.vm.provision :chef_solo do |chef|
+                # BASE:
+                # Provides initial configuration for proxies etc, which may
+                # be required by subsequent recipies
 
-                Helpers.proxy(chef, PROXY) if !(PROXY).nil?
+                config.vm.provision :chef_solo do |chef|
 
-                chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
-                chef.roles_path = "chef/roles"
-                chef.json = CHEF_JSON
+                    Helpers.proxy(chef, PROXY) if !(PROXY).nil?
 
-                chef.add_role('base');
+                    chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
+                    chef.roles_path = "chef/roles"
+                    chef.json = CHEF_JSON
 
-            end
-
-            ## PROVISION
-
-            config.vm.provision :chef_solo do |chef|
-
-                Helpers.proxy(chef, PROXY) if !(PROXY).nil?
-
-                chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
-                chef.roles_path = "chef/roles"
-
-                # To turn on chef debug output, run "CHEF_LOG=1 vagrant up" from command line
-                chef.log_level = :debug if !(ENV["CHEF_LOG"]).nil?
-
-                ["role", "recipe"].each do |item|
-
-                    CHEF_CONFIG[item].each do |pkg|
-                        chef.send("add_#{item}", pkg)
-                    end if CHEF_CONFIG[item]
+                    chef.add_role('base');
 
                 end
 
-                chef.json = CHEF_JSON
+                ## PROVISION
+
+                config.vm.provision :chef_solo do |chef|
+
+                    Helpers.proxy(chef, PROXY) if !(PROXY).nil?
+
+                    chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
+                    chef.roles_path = "chef/roles"
+
+                    # To turn on chef debug output, run "CHEF_LOG=1 vagrant up" from command line
+                    chef.log_level = :debug if !(ENV["CHEF_LOG"]).nil?
+
+                    ["role", "recipe"].each do |item|
+
+                        CHEF_CONFIG[item].each do |pkg|
+                            chef.send("add_#{item}", pkg)
+                        end if CHEF_CONFIG[item]
+
+                    end
+
+                    chef.json = CHEF_JSON
+
+                end
 
             end
 
         end
 
-        # Run any necessary shell commands on the vm
-        config.vm.provision :shell, :path => "bin/post-provision.sh"
+        if init || reload
+
+            # Run any necessary shell commands on the vm
+            config.vm.provision :shell, :path => "bin/post-provision.sh"
+
+        end
 
     end
 
