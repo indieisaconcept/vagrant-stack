@@ -1,4 +1,6 @@
 .DS_Store
 .vagrant
-/chef/vendor/remote/*
-stack.json
+/chef/vendor/remote
+/node_modules
+/components
+/stack.json

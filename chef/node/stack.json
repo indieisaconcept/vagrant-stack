@@ -1,0 +1,58 @@
+
+{
+
+    // WORKSPACES
+    // Specify which paths should be shared with
+    // the VM
+    //
+    //      {
+    //          "host": "some/path/on/guest",
+    //          "guest": "/some/path/on/guest"
+    //      }
+
+    "workspaces": [
+
+    ],
+
+    "chef": {
+
+        // RECIPE
+        // Specify which recipies should be included in
+        // addition to those defined by the role
+
+        "recipe": [],
+
+        // ROLE
+        // Specify what role(s) should be used to provision the
+        // VM.
+
+        "role": [
+            "frontend"
+        ],
+
+        // JSON
+        // Depending upon the role used by the VM, configuration options can
+        // be supplied to override defaults. Each key should map to the default
+        // chef recipe name.
+
+        "json": {
+
+            // STACK
+            // This is the default recipe which can be used to configure
+            // defaults for items such as the proxy to use.
+
+            "stack": {
+
+                // PROXY:
+                // Speciy the proxy the VM should use to access
+                // external sources
+
+                // "proxy": "http://10.0.2.2:8080"
+
+            }
+
+        }
+
+    }
+
+}
