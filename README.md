@@ -29,7 +29,7 @@ some/dir/
 
 ## Installation
 
-Initial installation should take at most 10-20 minutes as some resources may need to be downloaded form the internet.
+Initial installation should take at most 10-20 minutes as some resources may need to be downloaded.
 
 ### Install vagrant dependences
 
