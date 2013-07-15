@@ -1,6 +1,4 @@
 .DS_Store
 .vagrant
-/workspaces/svn/*
-/workspaces/git/*
-/vagrant/chef/vendor/remote/*
+/chef/vendor/remote/*
 stack.json

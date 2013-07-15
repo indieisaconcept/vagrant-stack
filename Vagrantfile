@@ -8,13 +8,19 @@
 require './lib/helpers'
 
 # configuration
-VAGRANT_JSON = File.exist?('../stack.json') ? JSON.parse(File.read('../stack.json')) : JSON.parse(File.read('chef/node/stack.json'))
 
-Vagrant.configure("2") do |config|
+CONFIG_NAME     = 'stack.json'
+DEPENDENCY_MODE = File.exist?("../#{CONFIG_NAME}") && "../#{CONFIG_NAME}"
+STANDALONE_MODE = File.exist?("#{CONFIG_NAME}") && "#{CONFIG_NAME}"
+DEFAULT_MODE    = "chef/node/#{CONFIG_NAME}"
 
-    init = ARGV.first == "up"
-    provision = ARGV.first == "provision"
-    reload = ARGV.first == "reload"
+VAGRANT_JSON    = JSON.parse(File.read(DEPENDENCY_MODE || STANDALONE_MODE || DEFAULT_MODE))
+
+Vagrant.configure('2') do |config|
+
+    init = ARGV.first == 'up'
+    provision = ARGV.first == 'provision'
+    reload = ARGV.first == 'reload'
 
     #################################
     # PLUGINS                       #
@@ -22,20 +28,20 @@ Vagrant.configure("2") do |config|
 
     ## BERKSHELF ##
 
-    ENV["BERKSHELF_PATH"] = File.expand_path(File.dirname(__FILE__)) + "/chef/vendor/remote"
+    ENV['BERKSHELF_PATH'] = File.expand_path(File.dirname(__FILE__)) + '/chef/vendor/remote'
     config.berkshelf.enabled = true
 
     #################################
     # Base box and vm configuration #
     #################################
 
-    config.vm.hostname = "stack"
+    config.vm.hostname = 'stack'
 
     # Name of base box to be used
-    config.vm.box = "precise32"
+    config.vm.box = 'precise32'
 
     # Url of base box in case vagrant needs to download it
-    config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+    config.vm.box_url = 'http://files.vagrantup.com/precise32.box'
 
     #################################
     # Virtual Box                   #
@@ -44,14 +50,14 @@ Vagrant.configure("2") do |config|
     config.vm.provider :virtualbox do |vb|
 
         # Set the memory size
-        vb.customize ["modifyvm", :id, "--memory", "1024"]
+        vb.customize ['modifyvm', :id, '--memory', '1024']
 
         # VirtualBox performance improvements
-        vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
-        vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
-        #vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-        vb.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "off"]
-        vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/workspaces", "1"]
+        vb.customize ['modifyvm', :id, '--nictype1', 'virtio']
+        vb.customize ['modifyvm', :id, '--nictype2', 'virtio']
+        #vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+        vb.customize ['storagectl', :id, '--name', 'SATA Controller', '--hostiocache', 'off']
+        vb.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/workspaces', '1']
 
     end
 
@@ -65,23 +71,26 @@ Vagrant.configure("2") do |config|
     # Use host-only networking. Required for nfs shared folder.
     # Web site will be at http://<config.vm.host_name>.local
     #
-    # config.vm.network :hostonly, "172.21.21.21"
+    # config.vm.network :hostonly, '172.21.21.21'
 
     #################################
     # WORKSSPACES                   #
     #################################
 
-    ## DEFAULT
-    config.vm.synced_folder "../workspaces", "/workspaces", id: "workspaces-root"
+    if DEPENDENCY_MODE
+
+        ## DEFAULT
+        config.vm.synced_folder '../', '/workspaces', id: 'workspaces-root'
+
+    end
 
     ## WORKSPACE FOLDERS FROM CONFIG
 
-    VAGRANT_JSON["projects"].each do |item|
-        if File.directory?(item["host"])
-            config.vm.synced_folder item["host"], item["guest"]
+    VAGRANT_JSON['workspaces'].each do |item|
+        if File.directory?(item['host'])
+            config.vm.synced_folder item['host'], item['guest']
         end
-
-    end if VAGRANT_JSON["projects"]
+    end if VAGRANT_JSON['workspaces']
 
     #################################
     # Provisioners                  #
@@ -91,8 +100,8 @@ Vagrant.configure("2") do |config|
 
         if init || provision
 
-            CHEF_CONFIG = VAGRANT_JSON["chef"]
-            CHEF_JSON = CHEF_CONFIG["json"]
+            CHEF_CONFIG = VAGRANT_JSON['chef']
+            CHEF_JSON = CHEF_CONFIG['json']
             PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy']
 
             if CHEF_CONFIG
@@ -106,7 +115,7 @@ Vagrant.configure("2") do |config|
                     Helpers.proxy(chef, PROXY) if !(PROXY).nil?
 
                     chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
-                    chef.roles_path = "chef/roles"
+                    chef.roles_path = 'chef/roles'
                     chef.json = CHEF_JSON
 
                     chef.add_role('base');
@@ -120,12 +129,12 @@ Vagrant.configure("2") do |config|
                     Helpers.proxy(chef, PROXY) if !(PROXY).nil?
 
                     chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
-                    chef.roles_path = "chef/roles"
+                    chef.roles_path = 'chef/roles'
 
-                    # To turn on chef debug output, run "CHEF_LOG=1 vagrant up" from command line
-                    chef.log_level = :debug if !(ENV["CHEF_LOG"]).nil?
+                    # To turn on chef debug output, run 'CHEF_LOG=1 vagrant up' from command line
+                    chef.log_level = :debug if !(ENV['CHEF_LOG']).nil?
 
-                    ["role", "recipe"].each do |item|
+                    ['role', 'recipe'].each do |item|
 
                         CHEF_CONFIG[item].each do |pkg|
                             chef.send("add_#{item}", pkg)
@@ -144,7 +153,7 @@ Vagrant.configure("2") do |config|
         if init || reload
 
             # Run any necessary shell commands on the vm
-            config.vm.provision :shell, :path => "bin/post-provision.sh"
+            config.vm.provision :shell, :path => 'bin/post-provision.sh'
 
         end
 
