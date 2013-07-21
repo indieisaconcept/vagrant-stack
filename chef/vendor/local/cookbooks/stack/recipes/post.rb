@@ -11,6 +11,7 @@
 # NODE.JS - GLOBAL INSTALLS     #
 #################################
 
+package "libfontconfig1"
 
 npm_packages = node['nodejs'] && node['nodejs']['modules']
 
