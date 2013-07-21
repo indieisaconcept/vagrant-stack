@@ -8,28 +8,28 @@ Provides a standardised rinse and repeat Front End development environment.
 - INSTALL [Virtual Box](https://www.virtualbox.org/)
 - INSTALL [Vagrant](http://vagrantup.com/)
 
-## Overview
+### Checkout or download project
 
-`vagrant-stack` is intended to be either used standalone or as a dependency for an existing project.
-
-### Standalone
+#### Checkout
 
 ```
+> cd some/dir
 > git clone http://github.com/indieisaconcept/vagrant-stack.git
 ```
-> Alternatively just download
+> Windows users use ```git bash``` or suitable alternative
 
-### Dependency
+This will provide you with a directory structure as per below
 
 ```
-> git submodule add git://github.com/indieisaconcept/vagrant-stack.git ./vagrant
+some/dir/
+├── vagrant
+├── workspaces
+├── stack.json
 ```
-
-Windows users use ```git bash``` or suitable alternative
 
 ## Installation
 
-Initial installation should take at most 10-20 minutes as some resources may need to be downloaded.
+Initial installation should take at most 10-20 minutes as some resources may need to be downloaded form the internet.
 
 ### Install vagrant dependences
 
@@ -55,7 +55,6 @@ A role defines a collection of packages which are installed by default for the V
 |:-------------------------|------------------------------------------------:|
 | node.js & npm				| Provides support for node.js utilities
 | n (node version manager)	| Provides support for switching node.js version
-| http-server					| Quick and simple webserver
 | bower						| Client side package manager
 | grunt						| JavaScript task runner
 | susy						| Responsive sass css framework
@@ -68,7 +67,7 @@ A role defines a collection of packages which are installed by default for the V
 
 If you have exisiting projects already checked out then these can be referenced using the workspaces configuration.
 
-Locations added here will be available under ```workspaces/<project>```
+Locations added here will be available under ```workspaces\<project>```
 
 ```
 workspaces: [
@@ -87,9 +86,9 @@ workspaces: [
 Execute the command below to provision the VM with the default setup.
 
 ```
+> cd vagrant
 > vagrant up
 ```
-> Be sure to execute this command in the same directory as the Vagrantfile
 
 When ever you update your configuration, such as adding a new shared folder, exit out of the VM if you currently have an SSH session and run:
 
