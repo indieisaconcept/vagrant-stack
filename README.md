@@ -86,7 +86,6 @@ workspaces: [
 Execute the command below to provision the VM with the default setup.
 
 ```
-> cd vagrant
 > vagrant up
 ```
 
