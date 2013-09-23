@@ -3,4 +3,4 @@
 /chef/vendor/remote
 /node_modules
 /components
-/stack.json
+/vagrant.json
