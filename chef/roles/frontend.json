@@ -12,6 +12,7 @@
             "install_method": "binary",
 
             "modules": [
+                "package-script"
                 "n",
                 "bower",
                 "grunt-cli",
