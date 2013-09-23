@@ -18,15 +18,6 @@ Provides a standardised rinse and repeat Front End development environment.
 ```
 > Windows users use ```git bash``` or suitable alternative
 
-This will provide you with a directory structure as per below
-
-```
-some/dir/
-├── vagrant
-├── workspaces
-├── stack.json
-```
-
 ## Installation
 
 Initial installation should take at most 10-20 minutes as some resources may need to be downloaded form the internet.
@@ -35,6 +26,7 @@ Initial installation should take at most 10-20 minutes as some resources may nee
 
 ```
 > vagrant plugin install vagrant-berkshelf
+> vagrant plugin install vagrant-proxyconf 
 ```
 
 ### Customizing your environment (optional)
@@ -67,7 +59,7 @@ A role defines a collection of packages which are installed by default for the V
 
 If you have exisiting projects already checked out then these can be referenced using the workspaces configuration.
 
-Locations added here will be available under ```workspaces\<project>```
+Locations added here will be available under ```workspaces/<project>```
 
 ```
 workspaces: [
@@ -86,7 +78,6 @@ workspaces: [
 Execute the command below to provision the VM with the default setup.
 
 ```
-> cd vagrant
 > vagrant up
 ```
 

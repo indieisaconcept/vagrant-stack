@@ -6,7 +6,6 @@
     "description": "The base role for provisioning a vm",
 
     "run_list": [
-        "recipe[stack::proxy]",
         "recipe[apt]",
         "recipe[build-essential]"
     ]

@@ -1,5 +1,10 @@
-
 {
+
+    // SERVER
+
+    "server": {
+        "port": 3000
+    },
 
     // WORKSPACES
     // Specify which paths should be shared with
@@ -16,7 +21,7 @@
 
     "chef": {
 
-        // RECIPE
+        // RECIPE - NOT USED YET
         // Specify which recipies should be included in
         // addition to those defined by the role
 
@@ -47,7 +52,14 @@
                 // Speciy the proxy the VM should use to access
                 // external sources
 
-                // "proxy": "http://10.0.2.2:8080"
+                "proxy": {
+                    /*
+                    "http": "http://10.0.2.2:8080",
+                    "https": "$http_proxy",
+                    "ftp": "$http_proxy",
+                    "no_proxy": ""
+                    */
+                }
 
             }
 

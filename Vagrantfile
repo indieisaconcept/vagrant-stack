@@ -7,6 +7,9 @@
 
 require './lib/helpers'
 
+Vagrant.require_plugin 'vagrant-berkshelf'
+Vagrant.require_plugin 'vagrant-proxyconf'
+
 # configuration
 
 CONFIG_NAME     = 'stack.json'
@@ -15,6 +18,7 @@ STANDALONE_MODE = File.exist?("#{CONFIG_NAME}") && "#{CONFIG_NAME}"
 DEFAULT_MODE    = "chef/node/#{CONFIG_NAME}"
 
 VAGRANT_JSON    = JSON.parse(File.read(DEPENDENCY_MODE || STANDALONE_MODE || DEFAULT_MODE))
+SERVER_CONFIG   = VAGRANT_JSON['server']
 
 Vagrant.configure('2') do |config|
 
@@ -35,13 +39,13 @@ Vagrant.configure('2') do |config|
     # Base box and vm configuration #
     #################################
 
-    config.vm.hostname = 'stack'
+    config.vm.hostname = SERVER_CONFIG['host']  || 'stack'
 
     # Name of base box to be used
-    config.vm.box = 'precise32'
+    config.vm.box = SERVER_CONFIG['box'] || 'precise32'
 
     # Url of base box in case vagrant needs to download it
-    config.vm.box_url = 'http://files.vagrantup.com/precise32.box'
+    config.vm.box_url = SERVER_CONFIG['box_url'] || 'http://files.vagrantup.com/precise32.box'
 
     #################################
     # Virtual Box                   #
@@ -65,22 +69,30 @@ Vagrant.configure('2') do |config|
     # Networking                    #
     #################################
 
+    SERVER_PORT = SERVER_CONFIG['port'] || '2912'
+
     # Use port-forwarding. Web site will be at http://localhost:2912
-    config.vm.network :forwarded_port, guest: 2912, host: 2912
+    config.vm.network :forwarded_port, guest: SERVER_PORT, host: SERVER_PORT, auto_correct: true
 
     # Use host-only networking. Required for nfs shared folder.
     # Web site will be at http://<config.vm.host_name>.local
     #
     # config.vm.network :hostonly, '172.21.21.21'
 
+    # config.vm.network "private_network", ip: "192.168.50.4"
+    # config.vm.network :forwarded_port, guest: 8181, host: 8181
+    # config.vm.network "private_network", ip: "192.168.50.4"
+
     #################################
-    # WORKSSPACES                   #
+    # WORKSPACES                   #
     #################################
+
+    config.vm.synced_folder ".", "/vagrant", :disabled => true
 
     if DEPENDENCY_MODE
 
         ## DEFAULT
-        config.vm.synced_folder '../', '/workspaces', id: 'workspaces-root'
+        config.vm.synced_folder '../', '/workspaces', id: 'workspaces-root', :mount_options => ["dmode=777", "fmode=666"]
 
     end
 
@@ -88,7 +100,7 @@ Vagrant.configure('2') do |config|
 
     VAGRANT_JSON['workspaces'].each do |item|
         if File.directory?(item['host'])
-            config.vm.synced_folder item['host'], item['guest']
+            config.vm.synced_folder item['host'], item['guest'], :mount_options => ["dmode=777", "fmode=666"]
         end
     end if VAGRANT_JSON['workspaces']
 
@@ -98,11 +110,18 @@ Vagrant.configure('2') do |config|
 
     if init || provision || reload
 
-        if init || provision
+        CHEF_CONFIG = VAGRANT_JSON['chef']
+        CHEF_JSON = CHEF_CONFIG['json']
+        PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy'];
 
-            CHEF_CONFIG = VAGRANT_JSON['chef']
-            CHEF_JSON = CHEF_CONFIG['json']
-            PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy']
+        if !(PROXY).nil?
+            config.proxy.http = PROXY['http']
+            config.proxy.https = PROXY['https']
+            config.proxy.ftp = PROXY['ftp']
+            config.proxy.no_proxy = PROXY['no_proxy']
+        end
+
+        if init || provision
 
             if CHEF_CONFIG
 
@@ -111,8 +130,6 @@ Vagrant.configure('2') do |config|
                 # be required by subsequent recipies
 
                 config.vm.provision :chef_solo do |chef|
-
-                    Helpers.proxy(chef, PROXY) if !(PROXY).nil?
 
                     chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
                     chef.roles_path = 'chef/roles'
@@ -125,8 +142,6 @@ Vagrant.configure('2') do |config|
                 ## PROVISION
 
                 config.vm.provision :chef_solo do |chef|
-
-                    Helpers.proxy(chef, PROXY) if !(PROXY).nil?
 
                     chef.cookbooks_path = ['vendor/local/cookbooks', 'vendor/remote/cookbook']
                     chef.roles_path = 'chef/roles'
