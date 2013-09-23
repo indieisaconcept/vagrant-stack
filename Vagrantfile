@@ -12,7 +12,7 @@ Vagrant.require_plugin 'vagrant-proxyconf'
 
 # configuration
 
-CONFIG_NAME     = 'stack.json'
+CONFIG_NAME     = 'vagrant.json'
 DEPENDENCY_MODE = File.exist?("../#{CONFIG_NAME}") && "../#{CONFIG_NAME}"
 STANDALONE_MODE = File.exist?("#{CONFIG_NAME}") && "#{CONFIG_NAME}"
 DEFAULT_MODE    = "chef/node/#{CONFIG_NAME}"
