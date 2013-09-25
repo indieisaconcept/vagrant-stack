@@ -59,7 +59,7 @@ A role defines a collection of packages which are installed by default for the V
 
 If you have exisiting projects already checked out then these can be referenced using the workspaces configuration.
 
-Locations added here will be available under ```workspaces/<project>```
+Locations added here will be available under ```/<project>```
 
 ```
 workspaces: [
@@ -72,6 +72,8 @@ workspaces: [
 ]
 
 ```
+
+A default workspace can be accessed via ```workspace```, this is typically used is ```vagrant-stack``` is a dependency for an existing project.
 
 ### Initialize environment
 
@@ -94,7 +96,7 @@ Accessing the VM is done via SSH, the command below facilitates this.
 
 ```
 > vagrant ssh
-> cd /workspaces
+> cd /workspace
 ```
 
 If you reboot your machine you will need to run `vagrant up` again but since it has already been provisioned it should take < 60 seconds to resume.
