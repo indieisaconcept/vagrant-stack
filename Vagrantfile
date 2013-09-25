@@ -48,24 +48,6 @@ Vagrant.configure('2') do |config|
     config.vm.box_url = SERVER_CONFIG['box_url'] || 'http://files.vagrantup.com/precise32.box'
 
     #################################
-    # Virtual Box                   #
-    #################################
-
-    config.vm.provider :virtualbox do |vb|
-
-        # Set the memory size
-        vb.customize ['modifyvm', :id, '--memory', '1024']
-
-        # VirtualBox performance improvements
-        vb.customize ['modifyvm', :id, '--nictype1', 'virtio']
-        vb.customize ['modifyvm', :id, '--nictype2', 'virtio']
-        #vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
-        vb.customize ['storagectl', :id, '--name', 'SATA Controller', '--hostiocache', 'off']
-        vb.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/workspaces', '1']
-
-    end
-
-    #################################
     # Networking                    #
     #################################
 
@@ -92,7 +74,7 @@ Vagrant.configure('2') do |config|
     if DEPENDENCY_MODE
 
         ## DEFAULT
-        config.vm.synced_folder '../', '/workspaces', id: 'workspaces-root', :mount_options => ["dmode=777", "fmode=666"]
+        config.vm.synced_folder '../', '/workspace', id: 'workspace-root', :mount_options => ["dmode=777", "fmode=666"]
 
     end
 
@@ -103,6 +85,24 @@ Vagrant.configure('2') do |config|
             config.vm.synced_folder item['host'], item['guest'], :mount_options => ["dmode=777", "fmode=666"]
         end
     end if VAGRANT_JSON['workspaces']
+
+    #################################
+    # Virtual Box                   #
+    #################################
+
+    config.vm.provider :virtualbox do |vb|
+
+        # Set the memory size
+        vb.customize ['modifyvm', :id, '--memory', '1024']
+
+        # VirtualBox performance improvements
+        vb.customize ['modifyvm', :id, '--nictype1', 'virtio']
+        vb.customize ['modifyvm', :id, '--nictype2', 'virtio']
+        #vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+        vb.customize ['storagectl', :id, '--name', 'SATA Controller', '--hostiocache', 'off']
+        vb.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/workspace', '1']
+
+    end
 
     #################################
     # Provisioners                  #
