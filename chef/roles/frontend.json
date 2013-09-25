@@ -10,6 +10,7 @@
         "nodejs": {
 
             "install_method": "binary",
+            "version": "v0.10.5",
 
             "modules": [
                 "package-script",

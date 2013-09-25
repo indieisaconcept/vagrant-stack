@@ -165,7 +165,7 @@ Vagrant.configure('2') do |config|
 
         end
 
-        if init || reload
+        if init || reload || provision
 
             # Run any necessary shell commands on the vm
             config.vm.provision :shell, :path => 'bin/post-provision.sh'
