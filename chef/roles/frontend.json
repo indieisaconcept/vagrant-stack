@@ -58,7 +58,6 @@
     "run_list": [
         "recipe[git]",
         "recipe[subversion]",
-        "recipe[oh_my_zsh]",
         "recipe[nodejs]",
         "recipe[stack::post]"
     ]

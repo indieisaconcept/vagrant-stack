@@ -56,6 +56,8 @@ Vagrant.configure('2') do |config|
 
     ## DEFAULT BOX ##
 
+    config.omnibus.chef_version = '10.14.2'
+
     config.vm.box       = PROVIDER_CONFIG[provider]['box']
     config.vm.box_url   = PROVIDER_CONFIG[provider]['box_url']
 
@@ -83,7 +85,10 @@ Vagrant.configure('2') do |config|
         aws.secret_access_key           = PROVIDER_CONFIG["aws"]['secret_key']
         aws.keypair_name                = PROVIDER_CONFIG["aws"]['keypair_name']
 
+        aws.instance_type               = PROVIDER_CONFIG["aws"]['instance_type']
         aws.ami                         = PROVIDER_CONFIG["aws"]['ami']
+        aws.region                      = PROVIDER_CONFIG["aws"]['region']
+        aws.security_groups             = PROVIDER_CONFIG["aws"]['security_groups']
 
         override.ssh.username           = PROVIDER_CONFIG["aws"]['ssh_username']
         override.ssh.private_key_path   = PROVIDER_CONFIG["aws"]['ssh_private_key_path']
