@@ -1,73 +1,65 @@
 #!/usr/bin/env ruby
 #^syntax detection
 
-#################################
-# HELPERS                       #
-#################################
+# ===============================
+# HELPERS
+# ===============================
 
 require './lib/helpers'
+
+# Shortcuts to ARGV
+
+init        = ARGV.first == 'up'
+provision   = ARGV.first == 'provision'
+reload      = ARGV.first == 'reload'
+
+# ===============================
+# PLUGINS
+# ===============================
 
 Vagrant.require_plugin 'vagrant-berkshelf'
 Vagrant.require_plugin 'vagrant-proxyconf'
 
-# configuration
+# ===============================
+# CONFIG
+# ===============================
 
 CONFIG_NAME     = 'vagrant.json'
 DEPENDENCY_MODE = File.exist?("../#{CONFIG_NAME}") && "../#{CONFIG_NAME}"
 STANDALONE_MODE = File.exist?("#{CONFIG_NAME}") && "#{CONFIG_NAME}"
 DEFAULT_MODE    = "chef/node/#{CONFIG_NAME}"
 
-VAGRANT_JSON    = JSON.parse(File.read(DEPENDENCY_MODE || STANDALONE_MODE || DEFAULT_MODE))
-SERVER_CONFIG   = VAGRANT_JSON['server']
+# Obtain default configuration file based on
+# file configuration
+
+# Register global config settings
+
+VAGRANT_JSON      = JSON.parse(File.read(DEPENDENCY_MODE || STANDALONE_MODE || DEFAULT_MODE))
+SERVER_CONFIG     = VAGRANT_JSON['server']
+PROVIDER_CONFIG   = SERVER_CONFIG['provider']
+
+# ===============================
+# VAGRANT
+# ===============================
+
+provider = ARGV.index{|s| s.include?("--provider=")}
+provider = provider ? ARGV[provider].sub('--provider=', '') : 'virtualbox'
 
 Vagrant.configure('2') do |config|
 
-    init = ARGV.first == 'up'
-    provision = ARGV.first == 'provision'
-    reload = ARGV.first == 'reload'
-
-    #################################
-    # PLUGINS                       #
-    #################################
-
-    ## BERKSHELF ##
-
-    ENV['BERKSHELF_PATH'] = File.expand_path(File.dirname(__FILE__)) + '/chef/vendor/remote'
-    config.berkshelf.enabled = true
-
-    #################################
-    # Base box and vm configuration #
-    #################################
-
-    config.vm.hostname = SERVER_CONFIG['host']  || 'stack'
-
-    # Name of base box to be used
-    config.vm.box = SERVER_CONFIG['box'] || 'precise32'
-
-    # Url of base box in case vagrant needs to download it
-    config.vm.box_url = SERVER_CONFIG['box_url'] || 'http://files.vagrantup.com/precise32.box'
-
-    #################################
-    # Networking                    #
-    #################################
-
-    SERVER_PORT = SERVER_CONFIG['port'] || '2912'
-
-    # Use port-forwarding. Web site will be at http://localhost:2912
-    config.vm.network :forwarded_port, guest: SERVER_PORT, host: SERVER_PORT, auto_correct: true
-
-    # Use host-only networking. Required for nfs shared folder.
-    # Web site will be at http://<config.vm.host_name>.local
+    # ===============================
+    # PROVIDERS
+    # ===============================
+    # Providers are selected using the command line argument
     #
-    # config.vm.network :hostonly, '172.21.21.21'
+    # --provider={name} => --provider=virtualbox
 
-    # config.vm.network "private_network", ip: "192.168.50.4"
-    # config.vm.network :forwarded_port, guest: 8181, host: 8181
-    # config.vm.network "private_network", ip: "192.168.50.4"
+    ## DEFAULT BOX ##
 
-    #################################
-    # Virtual Box                   #
-    #################################
+    config.vm.box       = PROVIDER_CONFIG[provider]['box']
+    config.vm.box_url   = PROVIDER_CONFIG[provider]['box_url']
+
+    ## VIRTUALBOX (default) ##
 
     config.vm.provider :virtualbox do |vb|
 
@@ -82,6 +74,39 @@ Vagrant.configure('2') do |config|
         vb.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/workspace', '1']
 
     end
+
+    ## AWS ##
+
+    config.vm.provider :aws do |aws, override|
+
+        aws.access_key_id               = PROVIDER_CONFIG["aws"]['key']
+        aws.secret_access_key           = PROVIDER_CONFIG["aws"]['secret_key']
+        aws.keypair_name                = PROVIDER_CONFIG["aws"]['keypair_name']
+
+        aws.ami                         = PROVIDER_CONFIG["aws"]['ami']
+
+        override.ssh.username           = PROVIDER_CONFIG["aws"]['ssh_username']
+        override.ssh.private_key_path   = PROVIDER_CONFIG["aws"]['ssh_private_key_path']
+
+    end
+
+    # ===============================
+    # PLUGINS
+    # ===============================
+
+    ## BERKSHELF ##
+
+    ENV['BERKSHELF_PATH'] = File.expand_path(File.dirname(__FILE__)) + '/chef/vendor/remote'
+    config.berkshelf.enabled = true
+
+    #################################
+    # Networking                    #
+    #################################
+
+    SERVER_PORT = SERVER_CONFIG['port'] || '2912'
+
+    # Use port-forwarding. Web site will be at http://localhost:2912
+    config.vm.network :forwarded_port, guest: SERVER_PORT, host: SERVER_PORT, auto_correct: true
 
     #################################
     # WORKSPACES                   #
@@ -104,21 +129,25 @@ Vagrant.configure('2') do |config|
         end
     end if VAGRANT_JSON['workspaces']
 
-    #################################
-    # Provisioners                  #
-    #################################
+    # ===============================
+    # PROVISION
+    # ===============================
 
     if init || provision || reload
 
         CHEF_CONFIG = VAGRANT_JSON['chef']
-        CHEF_JSON = CHEF_CONFIG['json']
-        PROXY = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy'];
+        CHEF_JSON   = CHEF_CONFIG['json']
+        PROXY       = CHEF_JSON['stack'] && CHEF_JSON['stack']['proxy'];
+
+        ## PROXY ##
+        # Depending upon the environment a proxy may be required to
+        # allow remote resources to be downloaded
 
         if !(PROXY).nil?
-            config.proxy.http = PROXY['http']
-            config.proxy.https = PROXY['https']
-            config.proxy.ftp = PROXY['ftp']
-            config.proxy.no_proxy = PROXY['no_proxy']
+            config.proxy.http       = PROXY['http']
+            config.proxy.https      = PROXY['https']
+            config.proxy.ftp        = PROXY['ftp']
+            config.proxy.no_proxy   = PROXY['no_proxy']
         end
 
         if init || provision
