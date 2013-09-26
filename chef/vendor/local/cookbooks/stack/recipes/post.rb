@@ -16,6 +16,7 @@ node_config = node['nodejs'];
 if node_config
 
     package "libfontconfig1"
+    package "curl"
 
     npm_packages = node_config['modules'];
 
