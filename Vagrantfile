@@ -81,17 +81,25 @@ Vagrant.configure('2') do |config|
 
     config.vm.provider :aws do |aws, override|
 
-        aws.access_key_id               = PROVIDER_CONFIG["aws"]['key']
-        aws.secret_access_key           = PROVIDER_CONFIG["aws"]['secret_key']
-        aws.keypair_name                = PROVIDER_CONFIG["aws"]['keypair_name']
+        ## load config file ##
 
-        aws.instance_type               = PROVIDER_CONFIG["aws"]['instance_type']
-        aws.ami                         = PROVIDER_CONFIG["aws"]['ami']
-        aws.region                      = PROVIDER_CONFIG["aws"]['region']
-        aws.security_groups             = PROVIDER_CONFIG["aws"]['security_groups']
+        aws_config = PROVIDER_CONFIG["aws"]
 
-        override.ssh.username           = PROVIDER_CONFIG["aws"]['ssh_username']
-        override.ssh.private_key_path   = PROVIDER_CONFIG["aws"]['ssh_private_key_path']
+        if aws_config["config_path"]
+            aws_config = File.exist?(aws_config["config_path"]) ? JSON.parse(File.read(aws_config["config_path"])) : aws_config
+        end if
+
+        aws.access_key_id               = aws_config['key']
+        aws.secret_access_key           = aws_config['secret_key']
+        aws.keypair_name                = aws_config['keypair_name']
+
+        aws.instance_type               = aws_config['instance_type']
+        aws.ami                         = aws_config['ami']
+        aws.region                      = aws_config['region']
+        aws.security_groups             = aws_config['security_groups']
+
+        override.ssh.username           = aws_config['ssh_username']
+        override.ssh.private_key_path   = aws_config['ssh_private_key_path']
 
     end
 
