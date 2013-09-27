@@ -9,7 +9,6 @@ site :opscode
 
 cookbook 'stack',       path: "chef/vendor/local/cookbooks/stack"
 cookbook 'oh_my_zsh',   path: "chef/vendor/local/cookbooks/oh_my_zsh"
-cookbook 'ant',         path: "chef/vendor/local/cookbooks/ant"
 
 #####################################
 # REMOTE                            #
