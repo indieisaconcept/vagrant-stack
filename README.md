@@ -24,9 +24,20 @@ Initial installation should take at most 10-20 minutes as some resources may nee
 
 ### Install vagrant dependences
 
+#### AWS Support
+
 ```
-> vagrant plugin install vagrant-berkshelf
-> vagrant plugin install vagrant-proxyconf 
+> vagrant plugin install vagrant-aws
+> vagrant plugin install vagrant-awsinfo
+> vagrant plugin install vagrant-omnibus ( install chef )
+```
+
+#### General
+
+```
+> vagrant plugin install vagrant-cachier ( faster provisions )
+> vagrant plugin install vagrant-berkshelf ( chef dependencies )
+> vagrant plugin install vagrant-proxyconf ( easier proxy configuration )
 ```
 
 ### Customizing your environment (optional)
