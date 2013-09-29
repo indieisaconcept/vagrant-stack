@@ -56,11 +56,10 @@ Vagrant.configure('2') do |config|
 
     ## DEFAULT BOX ##
 
+    config.omnibus.chef_version = '10.14.2'
+
     config.vm.box       = PROVIDER_CONFIG[provider]['box']
     config.vm.box_url   = PROVIDER_CONFIG[provider]['box_url']
-
-    config.omnibus.chef_version = '10.14.2'
-    config.cache.auto_detect = true
 
     ## VIRTUALBOX (default) ##
 
