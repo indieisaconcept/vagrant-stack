@@ -42,10 +42,14 @@ PROVIDER_CONFIG   = SERVER_CONFIG['provider']
 # VAGRANT
 # ===============================
 
+VAGRANTFILE_API_VERSION = "2"
+
 provider = ARGV.index{|s| s.include?("--provider=")}
 provider = provider ? ARGV[provider].sub('--provider=', '') : 'virtualbox'
 
-Vagrant.configure('2') do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+    config.vm.hostname = SERVER_CONFIG['host'] || 'vagrant'
 
     # ===============================
     # PROVIDERS
@@ -119,7 +123,7 @@ Vagrant.configure('2') do |config|
     SERVER_PORT = SERVER_CONFIG['port'] || '2912'
 
     # Use port-forwarding. Web site will be at http://localhost:2912
-    config.vm.network :forwarded_port, guest: SERVER_PORT, host: SERVER_PORT, auto_correct: true
+    config.vm.network :forwarded_port, guest: 3000, host: 3000, auto_correct: true
 
     #################################
     # WORKSPACES                   #
