@@ -22,7 +22,6 @@ if node_config
 
     npm_packages.each do | node_module |
       bash "npm install -g #{node_module}" do
-        user "root"
         code "npm install -g #{node_module}"
         not_if "npm ls -g | grep ' #{node_module}@'"
       end
@@ -31,7 +30,6 @@ if node_config
     node_path = "/usr/local/lib/node_modules"
 
     bash "export NODE_PATH=#{node_path}" do
-        user "root"
         code "echo 'export NODE_PATH=#{node_path}' >> /etc/environment"
         not_if "grep '#{node_path}' /etc/environment"
     end
