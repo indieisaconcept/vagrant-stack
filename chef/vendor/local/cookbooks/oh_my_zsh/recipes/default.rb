@@ -13,7 +13,7 @@ node['oh_my_zsh']['users'].each do |user_hash|
   home_directory = `cat /etc/passwd | grep "#{user_hash[:login]}" | cut -d ":" -f6`.chop
 
   git "#{home_directory}/.oh-my-zsh" do
-    repository 'http://github.com/robbyrussell/oh-my-zsh.git'
+    repository 'git://github.com/robbyrussell/oh-my-zsh.git'
     user user_hash[:login]
     reference "master"
     action :sync
