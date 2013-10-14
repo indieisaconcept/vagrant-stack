@@ -1,0 +1,7 @@
+[
+    "vagrant-proxyconf",
+    "vagrant-omnibus",
+    "vagrant-berkshelf",
+    "vagrant-aws",
+    "vagrant-awsinfo"
+]
