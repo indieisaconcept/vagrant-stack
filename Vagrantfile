@@ -35,8 +35,8 @@ DEFAULT_MODE    = "chef/node/#{CONFIG_NAME}"
 # Register global config settings
 
 VAGRANT_JSON      = JSON.parse(File.read(DEPENDENCY_MODE || STANDALONE_MODE || DEFAULT_MODE))
-SERVER_CONFIG     = VAGRANT_JSON['server']
-PROVIDER_CONFIG   = SERVER_CONFIG['provider']
+SERVER_CONFIG     = VAGRANT_JSON['server'] || {}
+PROVIDER_CONFIG   = SERVER_CONFIG['provider'] || {}
 
 # ===============================
 # VAGRANT
@@ -62,8 +62,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     config.omnibus.chef_version = '10.14.2'
 
-    config.vm.box       = PROVIDER_CONFIG[provider]['box']
-    config.vm.box_url   = PROVIDER_CONFIG[provider]['box_url']
+    config.vm.box       = PROVIDER_CONFIG[provider]['box'] || 'precise32'
+    config.vm.box_url   = PROVIDER_CONFIG[provider]['box_url'] || 'http://files.vagrantup.com/precise32.box'
 
     ## VIRTUALBOX (default) ##
 
@@ -89,21 +89,25 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         aws_config = PROVIDER_CONFIG["aws"]
 
-        if aws_config["config_path"]
-            aws_config = File.exist?(aws_config["config_path"]) ? JSON.parse(File.read(aws_config["config_path"])) : aws_config
-        end if
+        if aws_config
 
-        aws.access_key_id               = aws_config['key']
-        aws.secret_access_key           = aws_config['secret_key']
-        aws.keypair_name                = aws_config['keypair_name']
+            if aws_config["config_path"]
+                aws_config = File.exist?(aws_config["config_path"]) ? JSON.parse(File.read(aws_config["config_path"])) : aws_config
+            end if
 
-        aws.instance_type               = aws_config['instance_type']
-        aws.ami                         = aws_config['ami']
-        aws.region                      = aws_config['region']
-        aws.security_groups             = aws_config['security_groups']
+            aws.access_key_id               = aws_config['key']
+            aws.secret_access_key           = aws_config['secret_key']
+            aws.keypair_name                = aws_config['keypair_name']
 
-        override.ssh.username           = aws_config['ssh_username']
-        override.ssh.private_key_path   = aws_config['ssh_private_key_path']
+            aws.instance_type               = aws_config['instance_type']
+            aws.ami                         = aws_config['ami']
+            aws.region                      = aws_config['region']
+            aws.security_groups             = aws_config['security_groups']
+
+            override.ssh.username           = aws_config['ssh_username']
+            override.ssh.private_key_path   = aws_config['ssh_private_key_path']
+
+        end
 
     end
 
@@ -123,7 +127,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     SERVER_PORT = SERVER_CONFIG['port'] || '2912'
 
     # Use port-forwarding. Web site will be at http://localhost:2912
-    config.vm.network :forwarded_port, guest: 3000, host: 3000, auto_correct: true
+    config.vm.network :forwarded_port, guest: SERVER_PORT, host: SERVER_PORT, auto_correct: true
+    config.vm.network :forwarded_port, guest: 9999, host: 9999, auto_correct: true
 
     #################################
     # WORKSPACES                   #
