@@ -128,7 +128,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Use port-forwarding. Web site will be at http://localhost:2912
     config.vm.network :forwarded_port, guest: SERVER_PORT, host: SERVER_PORT, auto_correct: true
-    config.vm.network :forwarded_port, guest: 9999, host: 9999, auto_correct: true
 
     #################################
     # WORKSPACES                   #

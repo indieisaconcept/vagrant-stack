@@ -3,7 +3,21 @@
     // SERVER
 
     "server": {
+
         "port": 3000
+
+        // PROVIDER
+        // Default configurations for supported providers
+
+        "provider": {
+
+            "virtualbox":{
+                "box":"precise32",
+                "box_url": "http://files.vagrantup.com/precise32.box"
+            }
+
+        }
+
     },
 
     // WORKSPACES
