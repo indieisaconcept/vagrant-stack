@@ -113,3 +113,7 @@ Accessing the VM is done via SSH, the command below facilitates this.
 If you reboot your machine you will need to run `vagrant up` again but since it has already been provisioned it should take < 60 seconds to resume.
 
 For more information on available commands post installation review the vagrant commandline documentation located [here](http://docs.vagrantup.com/v2/cli/index.html)
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/indieisaconcept/vagrant-stack/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
